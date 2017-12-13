@@ -58,16 +58,12 @@ def applications_page_check(request, current_page=None, path=None):
 class AppRegexURLResolver(RegexURLResolver):
     def __init__(self, *args, **kwargs):
         self.page_id = None
-        self.url_patterns_dict = {}
+        self._url_patterns = []
         super(AppRegexURLResolver, self).__init__(*args, **kwargs)
 
     @property
     def url_patterns(self):
-        language = get_language()
-        if language in self.url_patterns_dict:
-            return self.url_patterns_dict[language]
-        else:
-            return []
+        return self._url_patterns
 
     def resolve_page_id(self, path):
         """Resolves requested path similar way how resolve does, but instead
@@ -265,7 +261,7 @@ def _get_app_patterns():
             if app.permissions:
                 _set_permissions(current_patterns, app.exclude_permissions)
 
-            resolver.url_patterns_dict[lang] = current_patterns
+            resolver._url_patterns.extend(current_patterns)
         app_patterns.append(resolver)
         APP_RESOLVERS.append(resolver)
     return app_patterns
